@@ -9,47 +9,180 @@ fn main() {
                 "value".to_string(),
                 Property::BuiltIn(Primitive::Int(0)),
             )]),
-            methods: HashMap::from([(
-                "+".to_string(),
-                Method::BuiltIn(|args, scope| {
-                    if let Property::UserDefined(object) = scope.get("self").unwrap().to_owned() {
-                        let mut object = object.clone();
-                        object.set_property("value".to_string(), {
-                            {
-                                if let Property::BuiltIn(Primitive::Int(i)) =
-                                    object.get_property("value".to_string()).unwrap()
+            methods: HashMap::from([
+                (
+                    "+".to_string(),
+                    Method::BuiltIn(|args, scope| {
+                        if let Property::UserDefined(object) = scope.get("self").unwrap().to_owned()
+                        {
+                            let mut object = object.clone();
+                            object.set_property("value".to_string(), {
                                 {
-                                    Property::BuiltIn(Primitive::Int(
-                                        i + if let Object {
-                                            properties,
-                                            methods: _,
-                                        } = args[0].clone()
-                                        {
-                                            let arg =
-                                                properties.to_owned().get("value").unwrap().clone();
-                                            if let Property::BuiltIn(Primitive::Int(i)) = arg {
-                                                i
+                                    if let Property::BuiltIn(Primitive::Int(i)) =
+                                        object.get_property("value".to_string()).unwrap()
+                                    {
+                                        Property::BuiltIn(Primitive::Int(
+                                            i + if let Object {
+                                                properties,
+                                                methods: _,
+                                            } = args[0].clone()
+                                            {
+                                                let arg = properties
+                                                    .to_owned()
+                                                    .get("value")
+                                                    .unwrap()
+                                                    .clone();
+                                                if let Property::BuiltIn(Primitive::Int(i)) = arg {
+                                                    i
+                                                } else {
+                                                    return None;
+                                                }
                                             } else {
                                                 return None;
-                                            }
-                                        } else {
-                                            return None;
-                                        },
-                                    ))
-                                } else {
-                                    return None;
+                                            },
+                                        ))
+                                    } else {
+                                        return None;
+                                    }
                                 }
-                            }
-                        });
-                        Some(object)
-                    } else {
-                        None
-                    }
-                }),
-            )]),
+                            });
+                            Some(object)
+                        } else {
+                            None
+                        }
+                    }),
+                ),
+                (
+                    "-".to_string(),
+                    Method::BuiltIn(|args, scope| {
+                        if let Property::UserDefined(object) = scope.get("self").unwrap().to_owned()
+                        {
+                            let mut object = object.clone();
+                            object.set_property("value".to_string(), {
+                                {
+                                    if let Property::BuiltIn(Primitive::Int(i)) =
+                                        object.get_property("value".to_string()).unwrap()
+                                    {
+                                        Property::BuiltIn(Primitive::Int(
+                                            i - if let Object {
+                                                properties,
+                                                methods: _,
+                                            } = args[0].clone()
+                                            {
+                                                let arg = properties
+                                                    .to_owned()
+                                                    .get("value")
+                                                    .unwrap()
+                                                    .clone();
+                                                if let Property::BuiltIn(Primitive::Int(i)) = arg {
+                                                    i
+                                                } else {
+                                                    return None;
+                                                }
+                                            } else {
+                                                return None;
+                                            },
+                                        ))
+                                    } else {
+                                        return None;
+                                    }
+                                }
+                            });
+                            Some(object)
+                        } else {
+                            None
+                        }
+                    }),
+                ),
+                (
+                    "*".to_string(),
+                    Method::BuiltIn(|args, scope| {
+                        if let Property::UserDefined(object) = scope.get("self").unwrap().to_owned()
+                        {
+                            let mut object = object.clone();
+                            object.set_property("value".to_string(), {
+                                {
+                                    if let Property::BuiltIn(Primitive::Int(i)) =
+                                        object.get_property("value".to_string()).unwrap()
+                                    {
+                                        Property::BuiltIn(Primitive::Int(
+                                            i * if let Object {
+                                                properties,
+                                                methods: _,
+                                            } = args[0].clone()
+                                            {
+                                                let arg = properties
+                                                    .to_owned()
+                                                    .get("value")
+                                                    .unwrap()
+                                                    .clone();
+                                                if let Property::BuiltIn(Primitive::Int(i)) = arg {
+                                                    i
+                                                } else {
+                                                    return None;
+                                                }
+                                            } else {
+                                                return None;
+                                            },
+                                        ))
+                                    } else {
+                                        return None;
+                                    }
+                                }
+                            });
+                            Some(object)
+                        } else {
+                            None
+                        }
+                    }),
+                ),
+                (
+                    "/".to_string(),
+                    Method::BuiltIn(|args, scope| {
+                        if let Property::UserDefined(object) = scope.get("self").unwrap().to_owned()
+                        {
+                            let mut object = object.clone();
+                            object.set_property("value".to_string(), {
+                                {
+                                    if let Property::BuiltIn(Primitive::Int(i)) =
+                                        object.get_property("value".to_string()).unwrap()
+                                    {
+                                        Property::BuiltIn(Primitive::Int(
+                                            i / if let Object {
+                                                properties,
+                                                methods: _,
+                                            } = args[0].clone()
+                                            {
+                                                let arg = properties
+                                                    .to_owned()
+                                                    .get("value")
+                                                    .unwrap()
+                                                    .clone();
+                                                if let Property::BuiltIn(Primitive::Int(i)) = arg {
+                                                    i
+                                                } else {
+                                                    return None;
+                                                }
+                                            } else {
+                                                return None;
+                                            },
+                                        ))
+                                    } else {
+                                        return None;
+                                    }
+                                }
+                            });
+                            Some(object)
+                        } else {
+                            None
+                        }
+                    }),
+                ),
+            ]),
         }),
     )]);
-    let program = parse_expr("1 + 1".to_string(), scope.clone()).unwrap();
+
+    let program = parse_expr("2 + ((5 * 2) - 3)".to_string(), scope.clone()).unwrap();
     dbg!(&program);
     dbg!(program.eval(scope));
 }
@@ -71,7 +204,17 @@ fn parse_object(source: String, scope: HashMap<String, Property>) -> Option<Obje
 fn parse_expr(source: String, scope: HashMap<String, Property>) -> Option<Expr> {
     let tokens = tokenize_expr(source);
     Some(Expr {
-        object: parse_object(tokens.get(0)?.to_string(), scope.clone())?,
+        object: if tokens.get(0)?.starts_with("(") && tokens.get(0)?.ends_with(")") {
+            let mut i = tokens.get(0)?.clone();
+            i.remove(i.find("(").unwrap());
+            i.remove(i.rfind(")").unwrap());
+            let expr = parse_expr(i.to_owned().to_string(), scope.clone())
+                .to_owned()
+                .unwrap();
+            expr.eval(scope.clone()).unwrap()
+        } else {
+            parse_object(tokens.get(0)?.to_owned(), scope.clone()).unwrap()
+        },
         message: tokens.get(1)?.to_string(),
         args: {
             let tokens = tokens.get(2..tokens.len())?.to_vec();
