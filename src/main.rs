@@ -1,7 +1,6 @@
 use rustyline::Editor;
 use std::collections::HashMap;
 
-#[allow(warnings)]
 fn main() {
     let scope = &mut HashMap::from([
         (
@@ -259,7 +258,6 @@ fn main() {
     }
 }
 
-#[allow(warnings)]
 fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<Object> {
     let mut temp = None;
     for line in source.split(";") {
@@ -279,10 +277,15 @@ fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<
                 {
                     let mut methods = methods.clone();
                     let mut properties = properties.clone();
+                    dbg!(&line[1].trim());
                     let result = parse_expr(line[1].trim().to_string(), scope.clone())?;
+                    dbg!(&result);
                     match result {
                         Program::Object(i) => {
-                            properties.insert(header[1].to_string(), Property::UserDefined(i));
+                            properties.insert(
+                                header[1].to_string(),
+                                Property::UserDefined(access_variable(&i, scope.clone())),
+                            );
                         }
                         Program::Expr(i) => {
                             methods.insert(header[1].to_string(), Method::UserDefined(i));
@@ -302,7 +305,7 @@ fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<
                     Property::UserDefined(
                         match parse_expr(line[1].trim().to_string(), scope.clone())? {
                             Program::Expr(i) => i.eval(scope.clone())?,
-                            Program::Object(i) => i,
+                            Program::Object(i) => access_variable(&i, scope.clone()),
                         },
                     ),
                 );
@@ -310,7 +313,7 @@ fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<
         } else {
             temp = Some(match parse_expr(line.to_string(), scope.clone())? {
                 Program::Expr(i) => i.eval(scope.clone())?,
-                Program::Object(i) => i.to_owned(),
+                Program::Object(i) => access_variable(&i, scope.clone()),
             });
         }
     }
@@ -319,9 +322,8 @@ fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<
 
 fn parse_object(source: String, scope: HashMap<String, Property>) -> Option<Object> {
     let source = source.trim().to_string();
-    if let Some(Property::UserDefined(i)) = scope.get(&source) {
-        Some(i.to_owned())
-    } else if let Ok(i) = source.parse::<f64>() {
+
+    if let Ok(i) = source.parse::<f64>() {
         let mut obj = if let Property::UserDefined(obj) = scope.get("number")?.to_owned() {
             obj
         } else {
@@ -341,11 +343,18 @@ fn parse_object(source: String, scope: HashMap<String, Property>) -> Option<Obje
         obj.set_property("value".to_string(), Property::BuiltIn(Primitive::Str(i)));
         Some(obj.clone())
     } else {
-        None
+        Some(Object {
+            properties: HashMap::from([(
+                "variable".to_string(),
+                Property::BuiltIn(Primitive::Str(source)),
+            )]),
+            methods: HashMap::new(),
+        })
     }
 }
 
 fn parse_expr(source: String, scope: HashMap<String, Property>) -> Option<Program> {
+    let source = source.trim().to_string();
     let tokens = tokenize_expr(source);
     if tokens.len() >= 3 {
         Some(Program::Expr(Expr {
@@ -480,10 +489,35 @@ enum Method {
 
 impl Method {
     fn eval(&self, args: Vec<Object>, scope: HashMap<String, Property>) -> Option<Object> {
+        let args: Vec<Object> = args
+            .iter()
+            .map(|i| access_variable(i, scope.clone()))
+            .collect();
         match self {
             Method::BuiltIn(program) => program(args, scope),
             Method::UserDefined(expr) => expr.eval(scope),
         }
+    }
+}
+
+fn access_variable(i: &Object, scope: HashMap<String, Property>) -> Object {
+    if let Object {
+        properties,
+        methods: _,
+    } = i
+    {
+        if let Some(Property::BuiltIn(Primitive::Str(value))) = properties.get("variable") {
+            if let Some(Property::UserDefined(j)) = scope.get(&value.clone()) {
+                dbg!("れみりあうー");
+                j.to_owned()
+            } else {
+                i.clone()
+            }
+        } else {
+            i.clone()
+        }
+    } else {
+        panic!("らんらんるー")
     }
 }
 
@@ -531,7 +565,7 @@ impl Expr {
                 .iter()
                 .map(|i| match i {
                     Program::Expr(i) => i.eval(scope.clone()).unwrap(),
-                    Program::Object(i) => i.to_owned(),
+                    Program::Object(i) => access_variable(i, scope.clone()),
                 })
                 .collect(),
             scope.clone(),
