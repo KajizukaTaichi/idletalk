@@ -1,13 +1,13 @@
+use rustyline::Editor;
 use std::collections::HashMap;
 
 fn main() {
-    println!("Idletalk 0.0.1");
     let scope = HashMap::from([(
-        "integer".to_string(),
+        "number".to_string(),
         Property::UserDefined(Object {
             properties: HashMap::from([(
                 "value".to_string(),
-                Property::BuiltIn(Primitive::Int(0)),
+                Property::BuiltIn(Primitive::Num(0.0)),
             )]),
             methods: HashMap::from([
                 (
@@ -18,10 +18,10 @@ fn main() {
                             let mut object = object.clone();
                             object.set_property("value".to_string(), {
                                 {
-                                    if let Property::BuiltIn(Primitive::Int(i)) =
+                                    if let Property::BuiltIn(Primitive::Num(i)) =
                                         object.get_property("value".to_string()).unwrap()
                                     {
-                                        Property::BuiltIn(Primitive::Int(
+                                        Property::BuiltIn(Primitive::Num(
                                             i + if let Object {
                                                 properties,
                                                 methods: _,
@@ -32,7 +32,7 @@ fn main() {
                                                     .get("value")
                                                     .unwrap()
                                                     .clone();
-                                                if let Property::BuiltIn(Primitive::Int(i)) = arg {
+                                                if let Property::BuiltIn(Primitive::Num(i)) = arg {
                                                     i
                                                 } else {
                                                     return None;
@@ -60,10 +60,10 @@ fn main() {
                             let mut object = object.clone();
                             object.set_property("value".to_string(), {
                                 {
-                                    if let Property::BuiltIn(Primitive::Int(i)) =
+                                    if let Property::BuiltIn(Primitive::Num(i)) =
                                         object.get_property("value".to_string()).unwrap()
                                     {
-                                        Property::BuiltIn(Primitive::Int(
+                                        Property::BuiltIn(Primitive::Num(
                                             i - if let Object {
                                                 properties,
                                                 methods: _,
@@ -74,7 +74,7 @@ fn main() {
                                                     .get("value")
                                                     .unwrap()
                                                     .clone();
-                                                if let Property::BuiltIn(Primitive::Int(i)) = arg {
+                                                if let Property::BuiltIn(Primitive::Num(i)) = arg {
                                                     i
                                                 } else {
                                                     return None;
@@ -102,10 +102,10 @@ fn main() {
                             let mut object = object.clone();
                             object.set_property("value".to_string(), {
                                 {
-                                    if let Property::BuiltIn(Primitive::Int(i)) =
+                                    if let Property::BuiltIn(Primitive::Num(i)) =
                                         object.get_property("value".to_string()).unwrap()
                                     {
-                                        Property::BuiltIn(Primitive::Int(
+                                        Property::BuiltIn(Primitive::Num(
                                             i * if let Object {
                                                 properties,
                                                 methods: _,
@@ -116,7 +116,7 @@ fn main() {
                                                     .get("value")
                                                     .unwrap()
                                                     .clone();
-                                                if let Property::BuiltIn(Primitive::Int(i)) = arg {
+                                                if let Property::BuiltIn(Primitive::Num(i)) = arg {
                                                     i
                                                 } else {
                                                     return None;
@@ -144,10 +144,10 @@ fn main() {
                             let mut object = object.clone();
                             object.set_property("value".to_string(), {
                                 {
-                                    if let Property::BuiltIn(Primitive::Int(i)) =
+                                    if let Property::BuiltIn(Primitive::Num(i)) =
                                         object.get_property("value".to_string()).unwrap()
                                     {
-                                        Property::BuiltIn(Primitive::Int(
+                                        Property::BuiltIn(Primitive::Num(
                                             i / if let Object {
                                                 properties,
                                                 methods: _,
@@ -158,7 +158,7 @@ fn main() {
                                                     .get("value")
                                                     .unwrap()
                                                     .clone();
-                                                if let Property::BuiltIn(Primitive::Int(i)) = arg {
+                                                if let Property::BuiltIn(Primitive::Num(i)) = arg {
                                                     i
                                                 } else {
                                                     return None;
@@ -182,61 +182,71 @@ fn main() {
         }),
     )]);
 
-    let program = parse_expr("2 + ((5 * 2) - 3)".to_string(), scope.clone()).unwrap();
-    dbg!(&program);
-    dbg!(program.eval(scope));
+    println!("Idletalk 0.0.1");
+    let mut rl = Editor::<()>::new();
+    let mut n = 0;
+
+    loop {
+        let code: String = rl.readline(&format!("[{n}]> ")).unwrap();
+        let result = eval_expr(code, scope.clone());
+        dbg!(result);
+        n += 1;
+    }
 }
 
 fn parse_object(source: String, scope: HashMap<String, Property>) -> Option<Object> {
-    if let Ok(i) = source.parse::<i128>() {
-        let mut obj = if let Property::UserDefined(obj) = scope.get("integer").unwrap().to_owned() {
+    if let Ok(i) = source.parse::<f64>() {
+        let mut obj = if let Property::UserDefined(obj) = scope.get("number").unwrap().to_owned() {
             obj
         } else {
             return None;
         };
-        obj.set_property("value".to_string(), Property::BuiltIn(Primitive::Int(i)));
+        obj.set_property("value".to_string(), Property::BuiltIn(Primitive::Num(i)));
         Some(obj.clone())
     } else {
         None
     }
 }
 
-fn parse_expr(source: String, scope: HashMap<String, Property>) -> Option<Expr> {
+fn eval_expr(source: String, scope: HashMap<String, Property>) -> Option<Object> {
     let tokens = tokenize_expr(source);
-    Some(Expr {
-        object: if tokens.get(0)?.starts_with("(") && tokens.get(0)?.ends_with(")") {
-            let mut i = tokens.get(0)?.clone();
-            i.remove(i.find("(").unwrap());
-            i.remove(i.rfind(")").unwrap());
-            let expr = parse_expr(i.to_owned().to_string(), scope.clone())
-                .to_owned()
-                .unwrap();
-            expr.eval(scope.clone()).unwrap()
-        } else {
-            parse_object(tokens.get(0)?.to_owned(), scope.clone()).unwrap()
-        },
-        message: tokens.get(1)?.to_string(),
-        args: {
-            let tokens = tokens.get(2..tokens.len())?.to_vec();
-            let tokens: Vec<Object> = tokens
-                .iter()
-                .map(|i| {
-                    if i.starts_with("(") && i.ends_with(")") {
-                        let mut i = i.clone();
-                        i.remove(i.find("(").unwrap());
-                        i.remove(i.rfind(")").unwrap());
-                        let expr = parse_expr(i.to_owned().to_string(), scope.clone())
-                            .to_owned()
-                            .unwrap();
-                        expr.eval(scope.clone()).unwrap()
-                    } else {
-                        parse_object(i.to_owned(), scope.clone()).unwrap()
-                    }
-                })
-                .collect();
-            tokens
-        },
-    })
+    if tokens.len() >= 3 {
+        Expr {
+            object: if tokens.get(0)?.starts_with("(") && tokens.get(0)?.ends_with(")") {
+                let mut i = tokens.get(0)?.clone();
+                i.remove(i.find("(").unwrap());
+                i.remove(i.rfind(")").unwrap());
+                eval_expr(i.to_owned().to_string(), scope.clone())
+                    .to_owned()
+                    .unwrap()
+            } else {
+                parse_object(tokens.get(0)?.to_owned(), scope.clone()).unwrap()
+            },
+            message: tokens.get(1)?.to_string(),
+            args: {
+                let tokens = tokens.get(2..tokens.len())?.to_vec();
+                let tokens: Vec<Object> = tokens
+                    .iter()
+                    .map(|i| {
+                        if i.starts_with("(") && i.ends_with(")") {
+                            let mut i = i.clone();
+                            i.remove(i.find("(").unwrap());
+                            i.remove(i.rfind(")").unwrap());
+                            eval_expr(i.to_owned().to_string(), scope.clone())
+                                .to_owned()
+                                .unwrap()
+                        } else {
+                            parse_object(i.to_owned(), scope.clone()).unwrap()
+                        }
+                    })
+                    .collect();
+                tokens
+            },
+        }
+        .eval(scope)
+    } else {
+        parse_object(tokens.get(0)?.clone(), scope)
+    }
 }
 
 fn tokenize_expr(input: String) -> Vec<String> {
@@ -301,9 +311,8 @@ enum Property {
 
 #[derive(Clone, Debug)]
 enum Primitive {
-    Int(i128),
+    Num(f64),
     Str(String),
-    Float(f64),
 }
 
 #[derive(Clone, Debug)]
