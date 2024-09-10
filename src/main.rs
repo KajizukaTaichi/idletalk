@@ -1,8 +1,9 @@
 use rustyline::Editor;
 use std::collections::HashMap;
 
+#[allow(warnings)]
 fn main() {
-    let scope = HashMap::from([
+    let scope = &mut HashMap::from([
         (
             "number".to_string(),
             Property::UserDefined(Object {
@@ -279,14 +280,33 @@ fn main() {
 
     loop {
         let code: String = rl.readline(&format!("[{n}]> ")).unwrap();
-        let result = eval_expr(code, scope.clone());
+        let result = run_program(code, scope);
         dbg!(result);
         n += 1;
     }
 }
 
+fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<Object> {
+    let mut temp = None;
+    for line in source.split(";") {
+        if line.contains(":=") {
+            let line: Vec<&str> = line.split(":=").collect();
+            scope.insert(
+                line[0].trim().to_string(),
+                Property::UserDefined(eval_expr(line[1].trim().to_string(), scope.clone())?),
+            );
+        } else {
+            temp = eval_expr(line.to_string(), scope.clone());
+        }
+    }
+    temp
+}
+
 fn parse_object(source: String, scope: HashMap<String, Property>) -> Option<Object> {
-    if let Ok(i) = source.parse::<f64>() {
+    let source = source.trim().to_string();
+    if let Some(Property::UserDefined(i)) = scope.get(&source) {
+        Some(i.to_owned())
+    } else if let Ok(i) = source.parse::<f64>() {
         let mut obj = if let Property::UserDefined(obj) = scope.get("number").unwrap().to_owned() {
             obj
         } else {
