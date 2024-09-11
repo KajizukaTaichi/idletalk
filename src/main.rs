@@ -266,7 +266,7 @@ fn main() {
                                     object.get_property("string".to_string())?
                                 {
                                     println!("{i}");
-                                    Some(object)
+                                    None
                                 } else {
                                     None
                                 }
@@ -281,7 +281,7 @@ fn main() {
                             if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
                                 let mut object = object.clone();
                                 if let Property::BuiltIn(Primitive::Str(i)) =
-                                    object.get_property("value".to_string())?
+                                    object.get_property("string".to_string())?
                                 {
                                     Some(Object {
                                         properties: HashMap::from([(
@@ -319,7 +319,7 @@ fn main() {
 
 fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<Object> {
     let mut temp = None;
-    for line in source.split(";") {
+    for line in source.split("\n") {
         if line.contains("=") {
             let line: Vec<&str> = line.split("=").collect();
             if line[0].trim().contains(" ") {
@@ -396,7 +396,7 @@ fn parse_object(source: String, scope: HashMap<String, Property>) -> Option<Obje
         } else {
             return None;
         };
-        obj.set_property("number".to_string(), Property::BuiltIn(Primitive::Str(i)));
+        obj.set_property("string".to_string(), Property::BuiltIn(Primitive::Str(i)));
         Some(obj.clone())
     } else {
         Some(Object {
@@ -606,9 +606,16 @@ impl Object {
         let binding = access_variable(&self.clone(), scope.clone());
         scope.insert("self".to_string(), Property::UserDefined(binding));
         let binding = access_variable(&self.clone(), scope.clone());
-        let program = binding.methods.get(message.trim())?;
-        scope.extend(self.properties.clone());
-        program.eval(args, scope)
+        if let Some(program) = binding.methods.get(message.trim()) {
+            scope.extend(self.properties.clone());
+            program.eval(args, scope)
+        } else {
+            if binding.methods.contains_key("__missing__") {
+                binding.receive_message("__missing__".to_string(), args, scope)
+            } else {
+                None
+            }
+        }
     }
 
     pub fn get_property(&self, name: String) -> Option<Property> {
