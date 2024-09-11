@@ -591,7 +591,8 @@ impl Object {
         scope: HashMap<String, Property>,
     ) -> Option<Object> {
         let mut scope = scope.clone();
-        scope.insert("self".to_string(), Property::UserDefined(self.clone()));
+        let binding = access_variable(&self.clone(), scope.clone());
+        scope.insert("self".to_string(), Property::UserDefined(binding));
         let binding = access_variable(&self.clone(), scope.clone());
         dbg!(&binding);
         let program = binding.methods.get(message.trim()).unwrap();
