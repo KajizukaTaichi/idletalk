@@ -1,4 +1,3 @@
-#![allow(warnings)]
 use rustyline::Editor;
 use std::collections::HashMap;
 
@@ -8,7 +7,7 @@ fn main() {
             "number".to_string(),
             Property::UserDefined(Object {
                 properties: HashMap::from([(
-                    "number".to_string(),
+                    "number_value".to_string(),
                     Property::BuiltIn(Primitive::Num(0.0)),
                 )]),
                 methods: HashMap::from([
@@ -17,20 +16,21 @@ fn main() {
                         Method::BuiltIn(|args, scope| {
                             if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
                                 let mut object = object.clone();
-                                object.set_property("number".to_string(), {
+                                object.set_property("number_value".to_string(), {
                                     {
                                         if let Property::BuiltIn(Primitive::Num(i)) =
-                                            object.get_property("number".to_string())?
+                                            object.get_property("number_value".to_string())?
                                         {
                                             Property::BuiltIn(Primitive::Num(
-                                                i + if let Object {
-                                                    properties,
-                                                    methods: _,
-                                                } = args[0].clone()
-                                                {
+                                                i + {
+                                                    let Object {
+                                                        properties,
+                                                        methods: _,
+                                                    } = args[0].clone();
+
                                                     let arg = properties
                                                         .to_owned()
-                                                        .get("number")?
+                                                        .get("number_value")?
                                                         .clone();
                                                     if let Property::BuiltIn(Primitive::Num(i)) =
                                                         arg
@@ -39,8 +39,6 @@ fn main() {
                                                     } else {
                                                         return None;
                                                     }
-                                                } else {
-                                                    return None;
                                                 },
                                             ))
                                         } else {
@@ -59,20 +57,21 @@ fn main() {
                         Method::BuiltIn(|args, scope| {
                             if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
                                 let mut object = object.clone();
-                                object.set_property("number".to_string(), {
+                                object.set_property("number_value".to_string(), {
                                     {
                                         if let Property::BuiltIn(Primitive::Num(i)) =
-                                            object.get_property("number".to_string())?
+                                            object.get_property("number_value".to_string())?
                                         {
                                             Property::BuiltIn(Primitive::Num(
-                                                i - if let Object {
-                                                    properties,
-                                                    methods: _,
-                                                } = args[0].clone()
-                                                {
+                                                i - {
+                                                    let Object {
+                                                        properties,
+                                                        methods: _,
+                                                    } = args[0].clone();
+
                                                     let arg = properties
                                                         .to_owned()
-                                                        .get("number")?
+                                                        .get("number_value")?
                                                         .clone();
                                                     if let Property::BuiltIn(Primitive::Num(i)) =
                                                         arg
@@ -81,8 +80,6 @@ fn main() {
                                                     } else {
                                                         return None;
                                                     }
-                                                } else {
-                                                    return None;
                                                 },
                                             ))
                                         } else {
@@ -101,20 +98,21 @@ fn main() {
                         Method::BuiltIn(|args, scope| {
                             if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
                                 let mut object = object.clone();
-                                object.set_property("number".to_string(), {
+                                object.set_property("number_value".to_string(), {
                                     {
                                         if let Property::BuiltIn(Primitive::Num(i)) =
-                                            object.get_property("number".to_string())?
+                                            object.get_property("number_value".to_string())?
                                         {
                                             Property::BuiltIn(Primitive::Num(
-                                                i * if let Object {
-                                                    properties,
-                                                    methods: _,
-                                                } = args[0].clone()
-                                                {
+                                                i * {
+                                                    let Object {
+                                                        properties,
+                                                        methods: _,
+                                                    } = args[0].clone();
+
                                                     let arg = properties
                                                         .to_owned()
-                                                        .get("number")?
+                                                        .get("number_value")?
                                                         .clone();
                                                     if let Property::BuiltIn(Primitive::Num(i)) =
                                                         arg
@@ -123,8 +121,6 @@ fn main() {
                                                     } else {
                                                         return None;
                                                     }
-                                                } else {
-                                                    return None;
                                                 },
                                             ))
                                         } else {
@@ -143,20 +139,21 @@ fn main() {
                         Method::BuiltIn(|args, scope| {
                             if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
                                 let mut object = object.clone();
-                                object.set_property("number".to_string(), {
+                                object.set_property("number_value".to_string(), {
                                     {
                                         if let Property::BuiltIn(Primitive::Num(i)) =
-                                            object.get_property("number".to_string())?
+                                            object.get_property("number_value".to_string())?
                                         {
                                             Property::BuiltIn(Primitive::Num(
-                                                i / if let Object {
-                                                    properties,
-                                                    methods: _,
-                                                } = args[0].clone()
-                                                {
+                                                i / {
+                                                    let Object {
+                                                        properties,
+                                                        methods: _,
+                                                    } = args[0].clone();
+
                                                     let arg = properties
                                                         .to_owned()
-                                                        .get("number")?
+                                                        .get("number_value")?
                                                         .clone();
                                                     if let Property::BuiltIn(Primitive::Num(i)) =
                                                         arg
@@ -165,8 +162,6 @@ fn main() {
                                                     } else {
                                                         return None;
                                                     }
-                                                } else {
-                                                    return None;
                                                 },
                                             ))
                                         } else {
@@ -182,11 +177,10 @@ fn main() {
                     ),
                     (
                         "__display__".to_string(),
-                        Method::BuiltIn(|args, scope| {
+                        Method::BuiltIn(|_, scope| {
                             if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
-                                let mut object = object.clone();
                                 if let Property::BuiltIn(Primitive::Num(i)) =
-                                    object.get_property("number".to_string())?
+                                    object.get_property("number_value".to_string())?
                                 {
                                     Some(Object {
                                         properties: HashMap::from([(
@@ -210,7 +204,7 @@ fn main() {
             "string".to_string(),
             Property::UserDefined(Object {
                 properties: HashMap::from([(
-                    "string".to_string(),
+                    "string_value".to_string(),
                     Property::BuiltIn(Primitive::Str("".to_string())),
                 )]),
                 methods: HashMap::from([
@@ -219,22 +213,20 @@ fn main() {
                         Method::BuiltIn(|args, scope| {
                             if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
                                 let mut object = object.clone();
-                                object.set_property("string".to_string(), {
+                                object.set_property("string_value".to_string(), {
                                     {
                                         if let Property::BuiltIn(Primitive::Str(s)) =
-                                            object.get_property("string".to_string())?
+                                            object.get_property("string_value".to_string())?
                                         {
-                                            Property::BuiltIn(Primitive::Str(format!(
-                                                "{}{}",
-                                                s,
-                                                if let Object {
+                                            Property::BuiltIn(Primitive::Str(format!("{}{}", s, {
+                                                let Object {
                                                     properties,
                                                     methods: _,
-                                                } = args[0].clone()
+                                                } = args[0].clone();
                                                 {
                                                     let arg = properties
                                                         .to_owned()
-                                                        .get("string")?
+                                                        .get("string_value")?
                                                         .clone();
                                                     if let Property::BuiltIn(Primitive::Str(i)) =
                                                         arg
@@ -243,10 +235,8 @@ fn main() {
                                                     } else {
                                                         return None;
                                                     }
-                                                } else {
-                                                    return None;
-                                                },
-                                            )))
+                                                }
+                                            },)))
                                         } else {
                                             return None;
                                         }
@@ -260,10 +250,10 @@ fn main() {
                     ),
                     (
                         "print".to_string(),
-                        Method::BuiltIn(|args, scope| {
+                        Method::BuiltIn(|_, scope| {
                             if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
                                 if let Property::BuiltIn(Primitive::Str(i)) =
-                                    object.get_property("string".to_string())?
+                                    object.get_property("string_value".to_string())?
                                 {
                                     println!("{i}");
                                     None
@@ -277,11 +267,10 @@ fn main() {
                     ),
                     (
                         "__display__".to_string(),
-                        Method::BuiltIn(|args, scope| {
+                        Method::BuiltIn(|_, scope| {
                             if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
-                                let mut object = object.clone();
                                 if let Property::BuiltIn(Primitive::Str(i)) =
-                                    object.get_property("string".to_string())?
+                                    object.get_property("string_value".to_string())?
                                 {
                                     Some(Object {
                                         properties: HashMap::from([(
@@ -319,20 +308,20 @@ fn main() {
 
 fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<Object> {
     let mut temp = None;
-    for line in source.split("\n") {
-        if line.contains("=") {
-            let line: Vec<&str> = line.split("=").collect();
+    for line in tokenize_program(source) {
+        if line.len() == 2 {
             if line[0].trim().contains(" ") {
                 let header = line[0].split_whitespace().collect::<Vec<&str>>();
                 let result = parse_expr(header[0].to_string(), scope.clone())?;
                 let object = match result {
                     Program::Expr(i) => i.eval(scope.clone())?,
                     Program::Object(i) => access_variable(&i, scope.to_owned()),
+                    Program::Statement(i) => run_program(i.to_string(), &mut scope.clone())?,
                 };
-                if let Object {
+                let Object {
                     properties,
                     methods,
-                } = object
+                } = object;
                 {
                     let mut methods = methods.clone();
                     let mut properties = properties.clone();
@@ -346,7 +335,16 @@ fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<
                             );
                         }
                         Program::Expr(i) => {
-                            methods.insert(header[1].to_string(), Method::UserDefined(i));
+                            methods.insert(
+                                header[1].to_string(),
+                                Method::UserDefined(Program::Expr(i)),
+                            );
+                        }
+                        Program::Statement(i) => {
+                            methods.insert(
+                                header[1].to_string(),
+                                Method::UserDefined(Program::Statement(i)),
+                            );
                         }
                     }
                     temp = Some(Object {
@@ -360,6 +358,7 @@ fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<
                     match parse_expr(line[1].trim().to_string(), scope.clone())? {
                         Program::Expr(i) => i.eval(scope.clone())?,
                         Program::Object(i) => access_variable(&i, scope.clone()),
+                        Program::Statement(i) => run_program(i.to_string(), &mut scope.clone())?,
                     },
                 );
                 scope.insert(
@@ -368,9 +367,10 @@ fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<
                 );
             }
         } else {
-            temp = Some(match parse_expr(line.to_string(), scope.clone())? {
+            temp = Some(match parse_expr(line.get(0)?.to_string(), scope.clone())? {
                 Program::Expr(i) => i.eval(scope.clone())?,
                 Program::Object(i) => access_variable(&i, scope.clone()),
+                Program::Statement(i) => run_program(i.to_string(), &mut scope.clone())?,
             });
         }
     }
@@ -385,7 +385,10 @@ fn parse_object(source: String, scope: HashMap<String, Property>) -> Option<Obje
         } else {
             return None;
         };
-        obj.set_property("number".to_string(), Property::BuiltIn(Primitive::Num(i)));
+        obj.set_property(
+            "number_value".to_string(),
+            Property::BuiltIn(Primitive::Num(i)),
+        );
         Some(obj.clone())
     } else if source.starts_with("\"") && source.ends_with("\"") {
         let mut i = source.clone();
@@ -396,7 +399,10 @@ fn parse_object(source: String, scope: HashMap<String, Property>) -> Option<Obje
         } else {
             return None;
         };
-        obj.set_property("string".to_string(), Property::BuiltIn(Primitive::Str(i)));
+        obj.set_property(
+            "string_value".to_string(),
+            Property::BuiltIn(Primitive::Str(i)),
+        );
         Some(obj.clone())
     } else {
         Some(Object {
@@ -411,7 +417,7 @@ fn parse_object(source: String, scope: HashMap<String, Property>) -> Option<Obje
 
 fn parse_expr(source: String, scope: HashMap<String, Property>) -> Option<Program> {
     let source = source.trim().to_string();
-    let tokens = tokenize_expr(source);
+    let tokens = tokenize_expr(source, vec![' ', '\n', '\t', '\r', '　']);
     if tokens.len() >= 3 {
         Some(Program::Expr(Expr {
             object: if tokens.get(0)?.starts_with("(") && tokens.get(0)?.ends_with(")") {
@@ -422,7 +428,13 @@ fn parse_expr(source: String, scope: HashMap<String, Property>) -> Option<Progra
                 match result {
                     Program::Expr(i) => i.eval(scope.clone())?,
                     Program::Object(i) => access_variable(&i, scope.clone()),
+                    Program::Statement(i) => run_program(i.to_string(), &mut scope.clone())?,
                 }
+            } else if tokens.get(0)?.starts_with("{") && tokens.get(0)?.ends_with("}") {
+                let mut i = tokens.get(0)?.clone();
+                i.remove(i.find("{")?);
+                i.remove(i.rfind("}")?);
+                run_program(i.to_string(), &mut scope.clone())?
             } else {
                 access_variable(
                     &parse_object(tokens.get(0)?.to_owned(), scope.clone())?,
@@ -439,6 +451,11 @@ fn parse_expr(source: String, scope: HashMap<String, Property>) -> Option<Progra
                         i.remove(i.find("(")?);
                         i.remove(i.rfind(")")?);
                         parse_expr(i.to_owned().to_string(), scope.clone()).to_owned()?
+                    } else if i.starts_with("{") && i.ends_with("}") {
+                        let mut i = i.clone();
+                        i.remove(i.find("{")?);
+                        i.remove(i.rfind("}")?);
+                        Program::Statement(i.to_owned().to_string())
                     } else {
                         Program::Object(parse_object(i.to_owned(), scope.clone())?)
                     })
@@ -456,7 +473,13 @@ fn parse_expr(source: String, scope: HashMap<String, Property>) -> Option<Progra
                 match result {
                     Program::Expr(i) => i.eval(scope.clone())?,
                     Program::Object(i) => access_variable(&i, scope.clone()),
+                    Program::Statement(i) => run_program(i.to_string(), &mut scope.clone())?,
                 }
+            } else if tokens.get(0)?.starts_with("{") && tokens.get(0)?.ends_with("}") {
+                let mut i = tokens.get(0)?.clone();
+                i.remove(i.find("{")?);
+                i.remove(i.rfind("}")?);
+                run_program(i.to_string(), &mut scope.clone())?
             } else {
                 access_variable(
                     &parse_object(tokens.get(0)?.to_owned(), scope.clone())?,
@@ -475,7 +498,13 @@ fn parse_expr(source: String, scope: HashMap<String, Property>) -> Option<Progra
             match result {
                 Program::Expr(i) => Some(Program::Expr(i)),
                 Program::Object(i) => Some(Program::Object(access_variable(&i, scope))),
+                Program::Statement(i) => Some(Program::Statement(i)),
             }
+        } else if tokens.get(0)?.starts_with("{") && tokens.get(0)?.ends_with("}") {
+            let mut i = tokens.get(0)?.clone();
+            i.remove(i.find("{")?);
+            i.remove(i.rfind("}")?);
+            Some(Program::Statement(i))
         } else {
             Some(Program::Object(parse_object(
                 tokens[0].to_string(),
@@ -485,7 +514,86 @@ fn parse_expr(source: String, scope: HashMap<String, Property>) -> Option<Progra
     }
 }
 
-fn tokenize_expr(input: String) -> Vec<String> {
+fn tokenize_program(input: String) -> Vec<Vec<String>> {
+    let mut tokens: Vec<Vec<String>> = Vec::new();
+    let mut current_token = String::new();
+    let mut after_equal = String::new();
+    let mut is_equal = false;
+    let mut in_parentheses: usize = 0;
+
+    for c in input.chars() {
+        match c {
+            '{' => {
+                if is_equal {
+                    after_equal.push(c);
+                } else {
+                    current_token.push(c);
+                }
+                in_parentheses += 1;
+            }
+            '}' => {
+                if is_equal {
+                    after_equal.push(c);
+                } else {
+                    current_token.push(c);
+                }
+                in_parentheses -= 1;
+            }
+            ';' => {
+                if in_parentheses != 0 {
+                    if is_equal {
+                        after_equal.push(c);
+                    } else {
+                        current_token.push(c);
+                    }
+                } else {
+                    if !current_token.is_empty() {
+                        if is_equal {
+                            is_equal = false;
+                            tokens.push(vec![current_token.clone(), after_equal.clone()]);
+                            current_token.clear();
+                            after_equal.clear();
+                        } else {
+                            tokens.push(vec![current_token.clone()]);
+                            current_token.clear();
+                        }
+                    }
+                }
+            }
+            '=' => {
+                if in_parentheses != 0 {
+                    if is_equal {
+                        after_equal.push(c);
+                    } else {
+                        current_token.push(c);
+                    }
+                } else {
+                    is_equal = true;
+                }
+            }
+            _ => {
+                if is_equal {
+                    after_equal.push(c);
+                } else {
+                    current_token.push(c);
+                }
+            }
+        }
+    }
+
+    if in_parentheses == 0 && !current_token.is_empty() {
+        if is_equal {
+            tokens.push(vec![current_token.clone(), after_equal]);
+            current_token.clear();
+        } else {
+            tokens.push(vec![current_token.clone()]);
+            current_token.clear();
+        }
+    }
+    tokens
+}
+
+fn tokenize_expr(input: String, split: Vec<char>) -> Vec<String> {
     let mut tokens = Vec::new();
     let mut current_token = String::new();
     let mut in_parentheses: usize = 0;
@@ -512,22 +620,42 @@ fn tokenize_expr(input: String) -> Vec<String> {
                     }
                 }
             }
-            '"' => {
-                in_quote = !in_quote;
-                current_token.push(c);
-            }
-            ' ' | '\n' | '\t' | '\r' | '　' => {
-                if in_parentheses != 0 || in_quote {
+            '{' if !in_quote => {
+                if in_parentheses != 0 {
+                    in_parentheses += 1;
                     current_token.push(c);
                 } else {
-                    if !current_token.is_empty() {
+                    in_parentheses += 1;
+                    current_token.push(c);
+                }
+            }
+            '}' if !in_quote => {
+                if in_parentheses != 0 {
+                    current_token.push(c);
+                    in_parentheses -= 1;
+                    if in_parentheses == 0 {
                         tokens.push(current_token.clone());
                         current_token.clear();
                     }
                 }
             }
-            _ => {
+            '"' => {
+                in_quote = !in_quote;
                 current_token.push(c);
+            }
+            other => {
+                if split.contains(&other) {
+                    if in_parentheses != 0 || in_quote {
+                        current_token.push(c);
+                    } else {
+                        if !current_token.is_empty() {
+                            tokens.push(current_token.clone());
+                            current_token.clear();
+                        }
+                    }
+                } else {
+                    current_token.push(c);
+                }
             }
         }
     }
@@ -559,7 +687,7 @@ enum Primitive {
 #[derive(Clone, Debug)]
 enum Method {
     BuiltIn(fn(Vec<Object>, HashMap<String, Property>) -> Option<Object>),
-    UserDefined(Expr),
+    UserDefined(Program),
 }
 
 impl Method {
@@ -570,28 +698,29 @@ impl Method {
             .collect();
         match self {
             Method::BuiltIn(program) => program(args, scope),
-            Method::UserDefined(expr) => expr.eval(scope),
+            Method::UserDefined(Program::Expr(expr)) => expr.eval(scope),
+            Method::UserDefined(Program::Object(obj)) => Some(obj.to_owned()),
+            Method::UserDefined(Program::Statement(stmt)) => {
+                run_program(stmt.to_string(), &mut scope.clone())
+            }
         }
     }
 }
 
 fn access_variable(i: &Object, scope: HashMap<String, Property>) -> Object {
-    if let Object {
+    let Object {
         properties,
         methods: _,
-    } = i
-    {
-        if let Some(Property::BuiltIn(Primitive::Str(value))) = properties.get("variable") {
-            if let Some(Property::UserDefined(j)) = scope.get(&value.clone()) {
-                j.to_owned()
-            } else {
-                i.clone()
-            }
+    } = i;
+
+    if let Some(Property::BuiltIn(Primitive::Str(value))) = properties.get("variable") {
+        if let Some(Property::UserDefined(j)) = scope.get(&value.clone()) {
+            j.to_owned()
         } else {
             i.clone()
         }
     } else {
-        panic!("らんらんるー")
+        i.clone()
     }
 }
 
@@ -629,7 +758,7 @@ impl Object {
     pub fn display(&self, scope: HashMap<String, Property>) -> String {
         if let Some(Object {
             properties,
-            methods,
+            methods: _,
         }) = self.receive_message("__display__".to_string(), vec![], scope)
         {
             if let Some(Property::BuiltIn(Primitive::Str(i))) = properties.get("__display__") {
@@ -647,6 +776,7 @@ impl Object {
 enum Program {
     Expr(Expr),
     Object(Object),
+    Statement(String),
 }
 
 #[derive(Clone, Debug)]
@@ -666,6 +796,7 @@ impl Expr {
                     args.push(match i {
                         Program::Expr(i) => i.eval(scope.clone())?,
                         Program::Object(i) => access_variable(i, scope.clone()),
+                        Program::Statement(i) => run_program(i.to_string(), &mut scope.clone())?,
                     })
                 }
                 args
