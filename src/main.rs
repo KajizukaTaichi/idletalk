@@ -209,7 +209,7 @@ fn main() {
                 )]),
                 methods: HashMap::from([
                     (
-                        "concat".to_string(),
+                        "+".to_string(),
                         Method::BuiltIn(|args, scope| {
                             if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
                                 let mut object = object.clone();
@@ -276,6 +276,135 @@ fn main() {
                                         properties: HashMap::from([(
                                             "__display__".to_string(),
                                             Property::BuiltIn(Primitive::Str(i)),
+                                        )]),
+                                        methods: HashMap::new(),
+                                    })
+                                } else {
+                                    None
+                                }
+                            } else {
+                                None
+                            }
+                        }),
+                    ),
+                ]),
+            }),
+        ),
+        (
+            "bool".to_string(),
+            Property::UserDefined(Object {
+                properties: HashMap::from([(
+                    "bool_value".to_string(),
+                    Property::BuiltIn(Primitive::Num(0.0)),
+                )]),
+                methods: HashMap::from([
+                    (
+                        "&".to_string(),
+                        Method::BuiltIn(|args, scope| {
+                            if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
+                                let mut object = object.clone();
+                                object.set_property("bool_value".to_string(), {
+                                    {
+                                        if let Property::BuiltIn(Primitive::Num(s)) =
+                                            object.get_property("bool_value".to_string())?
+                                        {
+                                            Property::BuiltIn(Primitive::Num(
+                                                if (s != 0.0) && {
+                                                    let Object {
+                                                        properties,
+                                                        methods: _,
+                                                    } = args[0].clone();
+                                                    {
+                                                        let arg = properties
+                                                            .to_owned()
+                                                            .get("bool_value")?
+                                                            .clone();
+                                                        if let Property::BuiltIn(Primitive::Num(
+                                                            i,
+                                                        )) = arg
+                                                        {
+                                                            i != 0.0
+                                                        } else {
+                                                            return None;
+                                                        }
+                                                    }
+                                                } {
+                                                    1.0
+                                                } else {
+                                                    0.0
+                                                },
+                                            ))
+                                        } else {
+                                            return None;
+                                        }
+                                    }
+                                });
+                                Some(object)
+                            } else {
+                                None
+                            }
+                        }),
+                    ),
+                    (
+                        "|".to_string(),
+                        Method::BuiltIn(|args, scope| {
+                            if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
+                                let mut object = object.clone();
+                                object.set_property("bool_value".to_string(), {
+                                    {
+                                        if let Property::BuiltIn(Primitive::Num(s)) =
+                                            object.get_property("bool_value".to_string())?
+                                        {
+                                            Property::BuiltIn(Primitive::Num(
+                                                if (s != 0.0) || {
+                                                    let Object {
+                                                        properties,
+                                                        methods: _,
+                                                    } = args[0].clone();
+                                                    {
+                                                        let arg = properties
+                                                            .to_owned()
+                                                            .get("bool_value")?
+                                                            .clone();
+                                                        if let Property::BuiltIn(Primitive::Num(
+                                                            i,
+                                                        )) = arg
+                                                        {
+                                                            i != 0.0
+                                                        } else {
+                                                            return None;
+                                                        }
+                                                    }
+                                                } {
+                                                    1.0
+                                                } else {
+                                                    0.0
+                                                },
+                                            ))
+                                        } else {
+                                            return None;
+                                        }
+                                    }
+                                });
+                                Some(object)
+                            } else {
+                                None
+                            }
+                        }),
+                    ),
+                    (
+                        "__display__".to_string(),
+                        Method::BuiltIn(|_, scope| {
+                            if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
+                                if let Property::BuiltIn(Primitive::Num(i)) =
+                                    object.get_property("bool_value".to_string())?
+                                {
+                                    Some(Object {
+                                        properties: HashMap::from([(
+                                            "__display__".to_string(),
+                                            Property::BuiltIn(Primitive::Str(
+                                                (i != 0.0).to_string(),
+                                            )),
                                         )]),
                                         methods: HashMap::new(),
                                     })
@@ -388,6 +517,17 @@ fn parse_object(source: String, scope: HashMap<String, Property>) -> Option<Obje
         obj.set_property(
             "number_value".to_string(),
             Property::BuiltIn(Primitive::Num(i)),
+        );
+        Some(obj.clone())
+    } else if let Ok(i) = source.parse::<bool>() {
+        let mut obj = if let Property::UserDefined(obj) = scope.get("bool")?.to_owned() {
+            obj
+        } else {
+            return None;
+        };
+        obj.set_property(
+            "bool_value".to_string(),
+            Property::BuiltIn(Primitive::Num(if i { 1.0 } else { 0.0 })),
         );
         Some(obj.clone())
     } else if source.starts_with("\"") && source.ends_with("\"") {
