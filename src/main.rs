@@ -712,6 +712,7 @@ fn tokenize_program(input: String) -> Vec<Vec<String>> {
     let mut is_equal = false;
     let mut in_parentheses: usize = 0;
     let mut in_quote = false;
+    let mut escape = false;
 
     for c in input.chars() {
         match c {
@@ -732,7 +733,10 @@ fn tokenize_program(input: String) -> Vec<Vec<String>> {
                 in_parentheses -= 1;
             }
             '"' => {
-                in_quote = !in_quote;
+                if !escape {
+                    in_quote = !in_quote;
+                    escape = false;
+                }
                 if is_equal {
                     after_equal.push(c);
                 } else {
@@ -770,6 +774,9 @@ fn tokenize_program(input: String) -> Vec<Vec<String>> {
                 } else {
                     is_equal = true;
                 }
+            }
+            '\\' => {
+                escape = true;
             }
             _ => {
                 if is_equal {
