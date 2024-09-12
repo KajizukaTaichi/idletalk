@@ -4,6 +4,16 @@ use std::collections::HashMap;
 fn main() {
     let scope = &mut HashMap::from([
         (
+            "system".to_string(),
+            Property::UserDefined(Object {
+                properties: HashMap::new(),
+                methods: HashMap::from([(
+                    "exit".to_string(),
+                    Method::BuiltIn(|_, _| std::process::exit(0)),
+                )]),
+            }),
+        ),
+        (
             "number".to_string(),
             Property::UserDefined(Object {
                 properties: HashMap::from([(
