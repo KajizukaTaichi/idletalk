@@ -595,6 +595,20 @@ fn parse_object(source: String, scope: HashMap<String, Property>) -> Option<Obje
             Property::BuiltIn(Primitive::Str(i)),
         );
         Some(obj.clone())
+    } else if source.starts_with("@{") && source.ends_with("}") {
+        let mut i = source.clone();
+        i = i.replacen("@{", "", 1);
+        i.remove(i.rfind("}")?);
+        let mut obj = if let Property::UserDefined(obj) = scope.get("string")?.to_owned() {
+            obj
+        } else {
+            return None;
+        };
+        obj.set_property(
+            "string_value".to_string(),
+            Property::BuiltIn(Primitive::Str(i)),
+        );
+        Some(obj.clone())
     } else {
         Some(Object {
             properties: HashMap::from([(
