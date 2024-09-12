@@ -249,6 +249,46 @@ fn main() {
                         }),
                     ),
                     (
+                        "*".to_string(),
+                        Method::BuiltIn(|args, scope| {
+                            if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
+                                let mut object = object.clone();
+                                object.set_property("string_value".to_string(), {
+                                    {
+                                        if let Property::BuiltIn(Primitive::Str(s)) =
+                                            object.get_property("string_value".to_string())?
+                                        {
+                                            Property::BuiltIn(Primitive::Str(s.repeat({
+                                                let Object {
+                                                    properties,
+                                                    methods: _,
+                                                } = args.get(0)?.clone();
+                                                {
+                                                    let arg = properties
+                                                        .to_owned()
+                                                        .get("number_value")?
+                                                        .clone();
+                                                    if let Property::BuiltIn(Primitive::Num(i)) =
+                                                        arg
+                                                    {
+                                                        i as usize
+                                                    } else {
+                                                        return None;
+                                                    }
+                                                }
+                                            })))
+                                        } else {
+                                            return None;
+                                        }
+                                    }
+                                });
+                                Some(object)
+                            } else {
+                                None
+                            }
+                        }),
+                    ),
+                    (
                         "if".to_string(),
                         Method::BuiltIn(|args, scope| {
                             if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
@@ -474,7 +514,7 @@ fn main() {
     let mut n = 0;
 
     loop {
-        let code: String = rl.readline(&format!("[{n}]> ")).unwrap();
+        let code: String = rl.readline(&format!("[{n}]> ")).unwrap_or_default();
         let result = run_program(code, scope);
         if let Some(result) = result {
             println!("{}", result.display(scope.clone()));
@@ -917,6 +957,11 @@ impl Method {
             .iter()
             .map(|i| access_variable(i, scope.clone()))
             .collect();
+        let mut scope = scope.clone();
+        for (index, arg) in args.iter().enumerate() {
+            scope.insert(format!("arg{index}"), Property::UserDefined(arg.to_owned()));
+        }
+
         match self {
             Method::BuiltIn(program) => program(args, scope),
             Method::UserDefined(Program::Expr(expr)) => expr.eval(scope),
