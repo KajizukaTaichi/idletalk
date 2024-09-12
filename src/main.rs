@@ -292,7 +292,7 @@ fn main() {
         ),
     ]);
 
-    println!("Idletalk 0.0.1");
+    println!("Idletalk 0.1.0");
     let mut rl = Editor::<()>::new();
     let mut n = 0;
 
