@@ -26,7 +26,7 @@ fn main() {
                                                     let Object {
                                                         properties,
                                                         methods: _,
-                                                    } = args[0].clone();
+                                                    } = args.get(0)?.clone();
 
                                                     let arg = properties
                                                         .to_owned()
@@ -67,7 +67,7 @@ fn main() {
                                                     let Object {
                                                         properties,
                                                         methods: _,
-                                                    } = args[0].clone();
+                                                    } = args.get(0)?.clone();
 
                                                     let arg = properties
                                                         .to_owned()
@@ -108,7 +108,7 @@ fn main() {
                                                     let Object {
                                                         properties,
                                                         methods: _,
-                                                    } = args[0].clone();
+                                                    } = args.get(0)?.clone();
 
                                                     let arg = properties
                                                         .to_owned()
@@ -149,7 +149,7 @@ fn main() {
                                                     let Object {
                                                         properties,
                                                         methods: _,
-                                                    } = args[0].clone();
+                                                    } = args.get(0)?.clone();
 
                                                     let arg = properties
                                                         .to_owned()
@@ -222,7 +222,7 @@ fn main() {
                                                 let Object {
                                                     properties,
                                                     methods: _,
-                                                } = args[0].clone();
+                                                } = args.get(0)?.clone();
                                                 {
                                                     let arg = properties
                                                         .to_owned()
@@ -243,6 +243,54 @@ fn main() {
                                     }
                                 });
                                 Some(object)
+                            } else {
+                                None
+                            }
+                        }),
+                    ),
+                    (
+                        "if".to_string(),
+                        Method::BuiltIn(|args, scope| {
+                            if let Property::UserDefined(object) = scope.get("self")?.to_owned() {
+                                if let Property::BuiltIn(Primitive::Str(s)) =
+                                    object.get_property("string_value".to_string())?
+                                {
+                                    {
+                                        let Object {
+                                            properties,
+                                            methods: _,
+                                        } = args.get(0)?.clone();
+                                        {
+                                            let arg =
+                                                properties.to_owned().get("bool_value")?.clone();
+                                            if let Property::BuiltIn(Primitive::Num(i)) = arg {
+                                                if i != 0.0 {
+                                                    run_program(s, &mut scope.clone())
+                                                } else {
+                                                    let Object {
+                                                        properties,
+                                                        methods: _,
+                                                    } = args.get(1)?.clone();
+                                                    let wse = properties
+                                                        .to_owned()
+                                                        .get("string_value")?
+                                                        .clone();
+                                                    if let Property::BuiltIn(Primitive::Str(j)) =
+                                                        wse
+                                                    {
+                                                        run_program(j, &mut scope.clone())
+                                                    } else {
+                                                        None
+                                                    }
+                                                }
+                                            } else {
+                                                None
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    None
+                                }
                             } else {
                                 None
                             }
@@ -313,7 +361,7 @@ fn main() {
                                                     let Object {
                                                         properties,
                                                         methods: _,
-                                                    } = args[0].clone();
+                                                    } = args.get(0)?.clone();
                                                     {
                                                         let arg = properties
                                                             .to_owned()
@@ -360,7 +408,7 @@ fn main() {
                                                     let Object {
                                                         properties,
                                                         methods: _,
-                                                    } = args[0].clone();
+                                                    } = args.get(0)?.clone();
                                                     {
                                                         let arg = properties
                                                             .to_owned()
@@ -439,9 +487,9 @@ fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<
     let mut temp = None;
     for line in tokenize_program(source) {
         if line.len() == 2 {
-            if line[0].trim().contains(" ") {
-                let header = line[0].split_whitespace().collect::<Vec<&str>>();
-                let result = parse_expr(header[0].to_string(), scope.clone())?;
+            if line.get(0)?.trim().contains(" ") {
+                let header = line.get(0)?.split_whitespace().collect::<Vec<&str>>();
+                let result = parse_expr(header.get(0)?.to_string(), scope.clone())?;
                 let object = match result {
                     Program::Expr(i) => i.eval(scope.clone())?,
                     Program::Object(i) => access_variable(&i, scope.to_owned()),
@@ -454,24 +502,24 @@ fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<
                 {
                     let mut methods = methods.clone();
                     let mut properties = properties.clone();
-                    let result = parse_expr(line[1].trim().to_string(), scope.clone())?;
+                    let result = parse_expr(line.get(1)?.trim().to_string(), scope.clone())?;
 
                     match result {
                         Program::Object(i) => {
                             properties.insert(
-                                header[1].to_string(),
+                                header.get(1)?.to_string(),
                                 Property::UserDefined(access_variable(&i, scope.clone())),
                             );
                         }
                         Program::Expr(i) => {
                             methods.insert(
-                                header[1].to_string(),
+                                header.get(1)?.to_string(),
                                 Method::UserDefined(Program::Expr(i)),
                             );
                         }
                         Program::Statement(i) => {
                             methods.insert(
-                                header[1].to_string(),
+                                header.get(1)?.to_string(),
                                 Method::UserDefined(Program::Statement(i)),
                             );
                         }
@@ -480,18 +528,21 @@ fn run_program(source: String, scope: &mut HashMap<String, Property>) -> Option<
                         properties: properties.clone(),
                         methods: methods.clone(),
                     });
-                    scope.insert(header[0].to_string(), Property::UserDefined(temp.clone()?));
+                    scope.insert(
+                        header.get(0)?.to_string(),
+                        Property::UserDefined(temp.clone()?),
+                    );
                 };
             } else {
                 temp = Some(
-                    match parse_expr(line[1].trim().to_string(), scope.clone())? {
+                    match parse_expr(line.get(1)?.trim().to_string(), scope.clone())? {
                         Program::Expr(i) => i.eval(scope.clone())?,
                         Program::Object(i) => access_variable(&i, scope.clone()),
                         Program::Statement(i) => run_program(i.to_string(), &mut scope.clone())?,
                     },
                 );
                 scope.insert(
-                    line[0].trim().to_string(),
+                    line.get(0)?.trim().to_string(),
                     Property::UserDefined(temp.clone()?),
                 );
             }
@@ -647,7 +698,7 @@ fn parse_expr(source: String, scope: HashMap<String, Property>) -> Option<Progra
             Some(Program::Statement(i))
         } else {
             Some(Program::Object(parse_object(
-                tokens[0].to_string(),
+                tokens.get(0)?.to_string(),
                 scope.clone(),
             )?))
         }
@@ -660,10 +711,11 @@ fn tokenize_program(input: String) -> Vec<Vec<String>> {
     let mut after_equal = String::new();
     let mut is_equal = false;
     let mut in_parentheses: usize = 0;
+    let mut in_quote = false;
 
     for c in input.chars() {
         match c {
-            '{' => {
+            '{' if !in_quote => {
                 if is_equal {
                     after_equal.push(c);
                 } else {
@@ -671,7 +723,7 @@ fn tokenize_program(input: String) -> Vec<Vec<String>> {
                 }
                 in_parentheses += 1;
             }
-            '}' => {
+            '}' if !in_quote => {
                 if is_equal {
                     after_equal.push(c);
                 } else {
@@ -679,7 +731,15 @@ fn tokenize_program(input: String) -> Vec<Vec<String>> {
                 }
                 in_parentheses -= 1;
             }
-            ';' => {
+            '"' => {
+                in_quote = !in_quote;
+                if is_equal {
+                    after_equal.push(c);
+                } else {
+                    current_token.push(c);
+                }
+            }
+            ';' if !in_quote => {
                 if in_parentheses != 0 {
                     if is_equal {
                         after_equal.push(c);
@@ -700,7 +760,7 @@ fn tokenize_program(input: String) -> Vec<Vec<String>> {
                     }
                 }
             }
-            '=' => {
+            '=' if !in_quote => {
                 if in_parentheses != 0 {
                     if is_equal {
                         after_equal.push(c);
